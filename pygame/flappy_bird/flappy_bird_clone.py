@@ -5,13 +5,20 @@ from game import Game
 # initialize pygame module
 pygame.init()
 
+
 # create game window
 screen = pygame.display.set_mode((400, 720))
+
+# adds the captions to the game window
+pygame.display.set_caption("Flappy Bird")
+
+
 # create a Clock instance to control the frame rate
 clock = pygame.time.Clock()
 
 game = Game("bird.png", "pipe.png", "background.png", "ground.png")
 game.resize_images()
+
 
 SPAWNPIPE = pygame.USEREVENT
 pygame.time.set_timer(SPAWNPIPE, 1800)
