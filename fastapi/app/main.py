@@ -1,5 +1,5 @@
 from typing import Union, Optional
-from fastapi import FastAPI, Response, status, HTTPException
+from fastapi import FastAPI, Response, status, HTTPException, Depends
 from fastapi.params import Body
 from pydantic import BaseModel  # decribes the schema, validates user post
 from random import randrange
@@ -7,9 +7,15 @@ import psycopg2
 import os
 from psycopg2.extras import RealDictCursor  # for getting column names of the db table
 import time
+from . import models
+from .database import engine, get_db
+from sqlalchemy.orm import Session
+
+models.Base.metadata.create_all(bind=engine)
 
 db_user_name = os.environ.get("DB_USER")
-db_user_pwd = os.environ.get("DB_PWD")
+db_password = os.environ.get("DB_PWD")
+
 
 app = FastAPI()
 
@@ -27,7 +33,7 @@ while True:
             host="localhost",
             database="fastapi",
             user=db_user_name,
-            password=db_user_pwd,
+            password=db_password,
             cursor_factory=RealDictCursor,
         )
         cursor = conn.cursor()
@@ -58,12 +64,22 @@ def find_index_post(id):
             return ind
 
 
+@app.get("/sqlalchemy")
+def test_posts(db: Session = Depends(get_db)):
+    return {"message": "success"}
+
+
 # path operation
 @app.get(
     "/"
 )  # @ is for decorator representation, app is the name of the app, and get is the http method "/" represents the root path
 def read_root():  # the func name does not matter; but stick with descriptive
     return {"message": "Welcome to my API"}
+
+
+@app.get("/sqlalchemy")
+def test_posts(db: Session = Depends(get_db)):
+    return {"status": "success"}
 
 
 # requests GET method with url "/posts"
